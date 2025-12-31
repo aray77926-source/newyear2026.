@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Happy New Year 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  background: black;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.center {
+  position: absolute;
+  width: 100%;
+  top: 30%;
+  text-align: center;
+  color: gold;
+}
+
+.year {
+  font-size: 4em;
+  color: red;
+}
+
+#countdown {
+  font-size: 1.5em;
+  color: cyan;
+  margin-top: 10px;
+}
+
+button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="center">
+  <h1>🎉 Happy New Year 🎉</h1>
+  <div class="year">2026</div>
+  <div id="countdown"></div>
+  <button onclick="playMusic()">▶ Play Music</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<audio id="music" loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// 🎵 Music
+function playMusic() {
+  document.getElementById("music").play();
+}
+
+// ⏳ Countdown
+const target = new Date("Jan 1, 2026 00:00:00").getTime();
+const cd = document.getElementById("countdown");
+
+setInterval(() => {
+  const now = new Date().getTime();
+  const diff = target - now;
+
+  if (diff <= 0) {
+    cd.innerHTML = "🎆 HAPPY NEW YEAR 2026 🎆";
+    return;
+  }
+
+  const d = Math.floor(diff / (1000*60*60*24));
+  const h = Math.floor((diff / (1000*60*60)) % 24);
+  const m = Math.floor((diff / (1000*60)) % 60);
+  const s = Math.floor((diff / 1000) % 60);
+
+  cd.innerHTML = `${d} Days ${h} Hours ${m} Min ${s} Sec`;
+}, 1000);
+
+// 🎆 Fireworks
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let fireworks = [];
+
+class Firework {
+  constructor() {
+    this.x = Math.random() * canvas.width;
+    this.y = canvas.height;
+    this.color = `hsl(${Math.random()*360},100%,60%)`;
+    this.target = Math.random() * canvas.height / 2;
+    this.exploded = false;
+    this.particles = [];
+  }
+
+  update() {
+    if (!this.exploded) {
+      this.y -= 5;
+      if (this.y <= this.target) this.explode();
+    } else {
+      this.particles.forEach(p => p.update());
+    }
+  }
+
+  draw() {
+    if (!this.exploded) {
+      ctx.fillStyle = this.color;
+      ctx.fillRect(this.x, this.y, 3, 3);
+    } else {
+      this.particles.forEach(p => p.draw());
+    }
+  }
+
+  explode() {
+    this.exploded = true;
+    for (let i=0;i<80;i++) {
+      this.particles.push(new Particle(this.x,this.y,this.color));
+    }
+  }
+}
+
+class Particle {
+  constructor(x,y,color) {
+    this.x=x;
+    this.y=y;
+    this.color=color;
+    this.life=100;
+    this.angle=Math.random()*Math.PI*2;
+    this.speed=Math.random()*6;
+  }
+  update() {
+    this.x+=Math.cos(this.angle)*this.speed;
+    this.y+=Math.sin(this.angle)*this.speed;
+    this.life--;
+  }
+  draw() {
+    ctx.fillStyle=this.color;
+    ctx.fillRect(this.x,this.y,2,2);
+  }
+}
+
+function animate() {
+  ctx.fillStyle="rgba(0,0,0,0.2)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  fireworks.forEach((f,i)=>{
+    f.update();
+    f.draw();
+    if (f.exploded && f.particles.every(p=>p.life<=0)) fireworks.splice(i,1);
+  });
+
+  if (Math.random()<0.05) fireworks.push(new Firework());
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+
+</body>
+</html>
